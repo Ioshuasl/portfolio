@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { content, type Lang } from './content'
 import Hero from './components/Hero'
 import Section from './components/Section'
@@ -7,6 +8,7 @@ import TechChip from './components/TechChip'
 import Timeline from './components/Timeline'
 import Contact from './components/Contact'
 import ProjectCarousel from './components/ProjectCarousel'
+import type { Theme } from './components/ThemeToggle'
 
 const initialLang = (): Lang => {
   try {
@@ -18,9 +20,37 @@ const initialLang = (): Lang => {
   return navigator.language.startsWith('pt') ? 'pt' : 'en'
 }
 
+const initialTheme = (): Theme => {
+  try {
+    const saved = localStorage.getItem('theme')
+    if (saved === 'light' || saved === 'dark') return saved
+  } catch {
+    // localStorage indisponível
+  }
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
 export default function App() {
   const [lang, setLang] = useState<Lang>(initialLang)
+  const [theme, setTheme] = useState<Theme>(initialTheme)
+  // Cor do tema anterior, mostrada por cima e esmaecida para suavizar a troca.
+  const [veil, setVeil] = useState<{ id: number; color: string } | null>(null)
+  const reduce = useReducedMotion()
   const t = content[lang]
+
+  const toggleTheme = () => {
+    if (!reduce) setVeil({ id: Date.now(), color: getComputedStyle(document.body).backgroundColor })
+    setTheme((v) => (v === 'dark' ? 'light' : 'dark'))
+  }
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try {
+      localStorage.setItem('theme', theme)
+    } catch {
+      // localStorage indisponível
+    }
+  }, [theme])
 
   useEffect(() => {
     document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en'
@@ -33,11 +63,27 @@ export default function App() {
 
   return (
     <div className="mx-auto max-w-5xl px-6">
+      <AnimatePresence>
+        {veil && (
+          <motion.div
+            key={veil.id}
+            aria-hidden
+            className="pointer-events-none fixed inset-0 z-50"
+            style={{ background: veil.color }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+            onAnimationComplete={() => setVeil(null)}
+          />
+        )}
+      </AnimatePresence>
       <Header
         name="Ioshua Souza Lopes"
         role={t.role}
         lang={lang}
         setLang={setLang}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         links={[
           { id: 'about', label: t.about.label },
           { id: 'work', label: t.work.label },

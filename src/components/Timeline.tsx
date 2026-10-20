@@ -59,7 +59,7 @@ function Item({ row, nowLabel }: { row: Row; nowLabel: string }) {
         >
           {row.year}
         </p>
-        <p className="mt-1 text-xs text-muted sm:mt-2">{row.period}</p>
+        <p className="mt-1 text-xs font-medium text-fg sm:mt-2 sm:text-sm">{row.period}</p>
       </div>
 
       <div className="mt-3 sm:col-start-3 sm:mt-0">

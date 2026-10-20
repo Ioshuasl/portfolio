@@ -4,6 +4,7 @@
 @import "@fontsource/instrument-serif/latin-400-italic.css";
 
 :root {
+  color-scheme: light dark;
   --bg: #fafaf8;
   --fg: #141414;
   --muted: #6f6f6a;
@@ -11,8 +12,16 @@
   --accent: #ff4a1c;
 }
 
+:root[data-theme="dark"] {
+  --bg: #111110;
+  --fg: #f1f0ec;
+  --muted: #8e8d87;
+  --line: #262624;
+  --accent: #ff6a3d;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #111110;
     --fg: #f1f0ec;
     --muted: #8e8d87;
