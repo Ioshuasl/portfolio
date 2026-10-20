@@ -119,7 +119,7 @@ export default function App() {
 
         <Section id="work" label={t.work.label}>
           <Reveal>
-            <ProjectCarousel items={t.work.items} soon={t.work.soon} />
+            <ProjectCarousel items={t.work.items} soon={t.work.soon} labels={t.work.labels} />
           </Reveal>
         </Section>
 

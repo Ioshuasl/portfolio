@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { animate } from 'animejs'
 import { AnimatePresence, motion, type PanInfo } from 'framer-motion'
-
-type Item = { name: string; desc: string; tags: string }
+import type { WorkItem, WorkLabels } from '../content'
+import ProjectDialog from './ProjectDialog'
 
 // Pasta em public/projects/<slug>/ com cover.(mp4|webp) quando houver material.
 const SLUGS = ['clivra', 'opus', 'gs-sabores', 'weave', 'barbearia']
@@ -18,9 +18,10 @@ const SLIDE_RATIO = 0.88 // fatia da largura; o resto deixa o próximo slide apa
 
 const prefersReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export default function ProjectCarousel({ items, soon }: { items: Item[]; soon: string }) {
+export default function ProjectCarousel({ items, soon, labels }: { items: WorkItem[]; soon: string; labels: WorkLabels }) {
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [open, setOpen] = useState(false)
   const [width, setWidth] = useState(0)
   const viewport = useRef<HTMLDivElement>(null)
   const bars = useRef<(HTMLSpanElement | null)[]>([])
@@ -62,9 +63,9 @@ export default function ProjectCarousel({ items, soon }: { items: Item[]; soon: 
   }, [active, go])
 
   useEffect(() => {
-    if (paused) progress.current?.pause()
+    if (paused || open) progress.current?.pause()
     else progress.current?.play()
-  }, [paused, active])
+  }, [paused, open, active])
 
   const slideW = width * SLIDE_RATIO
   const step = slideW + GAP
@@ -109,11 +110,20 @@ export default function ProjectCarousel({ items, soon }: { items: Item[]; soon: 
           {items.map((it, i) => (
             <motion.div
               key={it.name}
-              className="aspect-[16/10] shrink-0 overflow-hidden rounded-xl bg-fg/[0.04] select-none"
+              className="aspect-[16/10] shrink-0 cursor-pointer overflow-hidden rounded-xl bg-fg/[0.04] select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               style={{ width: slideW || '88%' }}
               animate={{ opacity: i === active ? 1 : 0.4, scale: i === active ? 1 : 0.97 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              onClick={() => i !== active && go(i)}
+              onTap={() => (i === active ? setOpen(true) : go(i))}
+              onKeyDown={(e) => {
+                if (i === active && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  setOpen(true)
+                }
+              }}
+              role={i === active ? 'button' : undefined}
+              tabIndex={i === active ? 0 : -1}
+              aria-label={i === active ? `${labels.open}: ${it.name}` : undefined}
               aria-hidden={i !== active}
             >
               <Media slug={SLUGS[i]} name={it.name} index={i} soon={soon} active={i === active} />
@@ -160,6 +170,12 @@ export default function ProjectCarousel({ items, soon }: { items: Item[]; soon: 
           </button>
         ))}
       </div>
+      <ProjectDialog
+        item={open ? cur : null}
+        labels={labels}
+        onClose={() => setOpen(false)}
+        media={<Media key={cur.name} slug={SLUGS[active]} name={cur.name} index={active} soon={soon} active />}
+      />
     </div>
   )
 }
