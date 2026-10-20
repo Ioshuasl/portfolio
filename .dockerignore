@@ -1,2 +1,9 @@
 node_modules
 dist
+.git
+.claude
+design
+dados-portfolio.md
+*.tsbuildinfo
+Dockerfile
+.dockerignore

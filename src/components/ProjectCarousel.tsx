@@ -4,8 +4,14 @@ import { AnimatePresence, motion, type PanInfo } from 'framer-motion'
 import type { WorkItem, WorkLabels } from '../content'
 import ProjectDialog from './ProjectDialog'
 
-// Pasta em public/projects/<slug>/ com cover.(mp4|webp) quando houver material.
+// Pasta em public/projects/<slug>/. COVERS diz qual arquivo cada projeto usa (.mp4 vira vídeo); sem entrada, aparece o placeholder.
 const SLUGS = ['clivra', 'opus', 'gs-sabores', 'weave', 'barbearia']
+const COVERS: Record<string, string> = {
+  clivra: 'cover.webp',
+  opus: 'cover.webp',
+  weave: 'cover.webp',
+  barbearia: 'cover.png',
+}
 // Capas largas (diagramas) aparecem inteiras, sem corte.
 const CONTAIN = ['barbearia']
 // Projetos com várias telas: passam sozinhas dentro do slide.
@@ -193,34 +199,34 @@ function ArrowButton({ dir, onClick }: { dir: 'prev' | 'next'; onClick: () => vo
 }
 
 function Media({ slug, name, index, soon, active }: { slug: string; name: string; index: number; soon: string; active: boolean }) {
-  const [state, setState] = useState<'video' | 'webp' | 'png' | 'none'>('video')
-  const base = `/projects/${slug}/cover`
+  const [failed, setFailed] = useState(false)
   const gallery = GALLERY[slug]
   if (gallery) return <Slideshow slug={slug} files={gallery} name={name} active={active} />
 
-  if (state === 'video')
+  const file = COVERS[slug]
+  const src = file && !failed ? `/projects/${slug}/${file}` : null
+  if (src && file.endsWith('.mp4'))
     return (
       <video
-        src={`${base}.mp4`}
+        src={src}
         className="pointer-events-none h-full w-full object-cover"
         autoPlay
         muted
         loop
         playsInline
         preload="metadata"
-        onError={() => setState('webp')}
+        onError={() => setFailed(true)}
       />
     )
-  if (state === 'webp' || state === 'png')
+  if (src)
     return (
       <img
-        key={state}
-        src={`${base}.${state}`}
+        src={src}
         alt={name}
         draggable={false}
         className={`pointer-events-none h-full w-full ${CONTAIN.includes(slug) ? 'bg-white object-contain p-3' : 'object-cover'}`}
         loading="lazy"
-        onError={() => setState(state === 'webp' ? 'png' : 'none')}
+        onError={() => setFailed(true)}
       />
     )
   return (
