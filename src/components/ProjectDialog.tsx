@@ -11,10 +11,12 @@ export default function ProjectDialog({ item, labels, media, onClose }: Props) {
   const reduce = useReducedMotion()
   const panel = useRef<HTMLDivElement>(null)
   const closeBtn = useRef<HTMLButtonElement>(null)
+  const openedAt = useRef(0)
   const isOpen = !!item
 
   useEffect(() => {
     if (!isOpen) return
+    openedAt.current = performance.now()
     const opener = document.activeElement as HTMLElement | null
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -58,7 +60,10 @@ export default function ProjectDialog({ item, labels, media, onClose }: Props) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduce ? 0 : 0.2 }}
-          onClick={onClose}
+          // No toque, o clique sintetizado após o tap que abriu o dialog cairia aqui e o fecharia na hora.
+          onClick={() => {
+            if (performance.now() - openedAt.current > 400) onClose()
+          }}
         >
           <motion.div
             ref={panel}
