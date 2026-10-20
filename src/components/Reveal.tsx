@@ -1,32 +1,22 @@
-import { useEffect, useRef, type ReactNode } from 'react'
-import { animate } from 'animejs'
+import type { ReactNode } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 
-// Anima o conteúdo quando entra na tela (Anime.js).
-export default function Reveal({ children, className = '' }: { children: ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null)
+// Entra com desfoque e sobe; ao sair da tela volta a esmaecer, então aparece e some com o scroll.
+export const revealProps = (delay = 0) => ({
+  initial: { opacity: 0, y: 20, filter: 'blur(8px)' },
+  whileInView: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] as const } },
+  // Margem positiva: começa antes de entrar na tela, então já está nítido quando aparece, mesmo no scroll rápido.
+  viewport: { once: false, amount: 0.1, margin: '0px 0px 12% 0px' },
+  // Saída rápida, já fora da tela.
+  transition: { duration: 0.2, ease: 'easeIn' as const },
+})
 
-  useEffect(() => {
-    const el = ref.current
-    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    el.style.opacity = '0'
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return
-        animate(el, { opacity: [0, 1], translateY: [24, 0], duration: 700, ease: 'outExpo' })
-        io.disconnect()
-      },
-      { threshold: 0.15 },
-    )
-    io.observe(el)
-    return () => {
-      io.disconnect()
-      el.style.opacity = ''
-    }
-  }, [])
-
+export default function Reveal({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+  const reduce = useReducedMotion()
+  if (reduce) return <div className={className}>{children}</div>
   return (
-    <div ref={ref} className={className}>
+    <motion.div className={className} {...revealProps(delay)}>
       {children}
-    </div>
+    </motion.div>
   )
 }

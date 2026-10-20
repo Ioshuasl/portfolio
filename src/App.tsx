@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { content, type Lang } from './content'
 import Hero from './components/Hero'
 import Section from './components/Section'
+import Reveal from './components/Reveal'
 import Header from './components/Header'
 import TechChip from './components/TechChip'
 import Timeline from './components/Timeline'
@@ -99,31 +100,33 @@ export default function App() {
         <Section id="about" label={t.about.label}>
           <div className="grid gap-10 sm:grid-cols-[1fr_18rem] sm:gap-16">
             <div className="space-y-5 text-lg leading-relaxed sm:text-xl">
-              {t.about.paragraphs.map((p) => (
-                <p key={p.slice(0, 24)} className="first:text-fg [&:not(:first-child)]:text-muted">
-                  {p}
-                </p>
+              {t.about.paragraphs.map((p, i) => (
+                <Reveal key={p.slice(0, 24)} delay={i * 0.08}>
+                  <p className={i === 0 ? 'text-fg' : 'text-muted'}>{p}</p>
+                </Reveal>
               ))}
             </div>
             <dl className="space-y-5 text-sm">
-              {t.about.facts.map((f) => (
-                <div key={f.k}>
+              {t.about.facts.map((f, i) => (
+                <Reveal key={f.k} delay={0.1 + i * 0.07}>
                   <dt className="text-muted">{f.k}</dt>
                   <dd className="mt-0.5">{f.v}</dd>
-                </div>
+                </Reveal>
               ))}
             </dl>
           </div>
         </Section>
 
         <Section id="work" label={t.work.label}>
-          <ProjectCarousel items={t.work.items} soon={t.work.soon} />
+          <Reveal>
+            <ProjectCarousel items={t.work.items} soon={t.work.soon} />
+          </Reveal>
         </Section>
 
         <Section id="how" label={t.how.label}>
           <dl className="divide-y divide-line">
             {t.how.rows.map((r) => (
-              <div key={r.k} className="grid gap-3 py-5 first:pt-0 sm:grid-cols-[9rem_1fr] sm:gap-6">
+              <Reveal key={r.k} className="grid gap-3 py-5 first:pt-0 sm:grid-cols-[9rem_1fr] sm:gap-6">
                 <dt className="pt-1.5 text-muted">{r.k}</dt>
                 <dd>
                   <ul className="flex flex-wrap gap-2">
@@ -133,18 +136,22 @@ export default function App() {
                   </ul>
                   {r.note && <p className="mt-3 text-sm text-muted">{r.note}</p>}
                 </dd>
-              </div>
+              </Reveal>
             ))}
           </dl>
         </Section>
 
         <Section id="path" label={t.path.label}>
-          <p className="mb-12 max-w-md font-serif text-2xl text-muted italic sm:text-3xl">{t.path.lead}</p>
+          <Reveal>
+            <p className="mb-12 max-w-md font-serif text-2xl text-muted italic sm:text-3xl">{t.path.lead}</p>
+          </Reveal>
           <Timeline rows={t.path.rows} nowLabel={t.path.now} legend={t.path.legend} />
         </Section>
 
         <Section id="contact" label={t.contact.label}>
-          <Contact t={t.contact} lang={lang} />
+          <Reveal>
+            <Contact t={t.contact} lang={lang} />
+          </Reveal>
         </Section>
       </main>
 

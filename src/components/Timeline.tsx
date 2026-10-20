@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion'
+import { revealProps } from './Reveal'
 import type { Content } from '../content'
 
 type Row = Content['path']['rows'][number]
@@ -36,12 +37,13 @@ export default function Timeline({ rows, nowLabel, legend }: { rows: Row[]; nowL
 function Item({ row, nowLabel }: { row: Row; nowLabel: string }) {
   const ref = useRef<HTMLLIElement>(null)
   const lit = useReached(ref)
+  const reduce = useReducedMotion()
   const isNow = row.kind === 'now'
   const isEdu = row.kind === 'edu'
   const isSide = row.kind === 'side'
 
   return (
-    <li ref={ref} className="relative pl-9 sm:grid sm:grid-cols-[8rem_2rem_1fr] sm:pl-0">
+    <motion.li ref={ref} className="relative pl-9 sm:grid sm:grid-cols-[8rem_2rem_1fr] sm:pl-0" {...(reduce ? {} : revealProps())}>
       <span
         aria-hidden
         className={`absolute top-2 left-[var(--x)] z-[1] h-3 w-3 -translate-x-1/2 border-2 transition-all duration-500 ${
@@ -73,7 +75,7 @@ function Item({ row, nowLabel }: { row: Row; nowLabel: string }) {
         {row.tag && <p className="mt-2 inline-block rounded-full border border-accent/50 px-2 py-0.5 text-xs text-accent">{row.tag}</p>}
         {row.note && <p className="mt-2 max-w-md text-sm text-muted">{row.note}</p>}
       </div>
-    </li>
+    </motion.li>
   )
 }
 
